@@ -4,27 +4,46 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Compass">
+    tools:context=".Main">
 
     <TextView
+        android:id="@+id/infoText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:textAlignment="center"
-        android:textSize="40sp"
-        android:textColor="#000"
-        android:textStyle="bold"
-        android:text="0°"
-        android:id="@+id/txt_azimuth"
+        android:layout_marginTop="20dp"
+        android:layout_marginHorizontal="20dp"
+        app:layout_constraintTop_toTopOf="parent"
+        android:text="Select which sensor to test:"
+        android:textSize="24dp" />
+
+    <Button
+        android:id="@+id/compassButton"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
         android:gravity="center_horizontal"
+        android:layout_marginTop="20dp"
+        android:layout_marginHorizontal="20dp"
+        android:paddingVertical="15dp"
+        android:textSize="21sp"
+        android:text="Compass"
+        app:layout_constraintTop_toBottomOf="@id/infoText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         tools:ignore="MissingConstraints" />
 
-    <ImageView
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/accelerometerButton"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:src="@drawable/compass"
-        android:layout_below="@+id/txt_azimuth"
-        android:id="@+id/img_compass"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="20dp"
+        android:layout_marginHorizontal="20dp"
+        android:paddingVertical="15dp"
+        android:textSize="21dp"
+        android:text="Accelerometer"
+        app:layout_constraintTop_toBottomOf="@id/compassButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         tools:ignore="MissingConstraints" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
