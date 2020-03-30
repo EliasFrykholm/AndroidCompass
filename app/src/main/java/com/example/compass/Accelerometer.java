@@ -2,37 +2,48 @@ package com.example.compass;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.ColorInt;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.text.DecimalFormat;
 
 public class Accelerometer extends AppCompatActivity implements SensorEventListener {
+    static final float ALPHA = 0.25f; // if ALPHA = 1 OR 0, no filter applies.
     TextView value_X;
     TextView value_Y;
     TextView value_Z;
+    int defaultTextColor;
+    int errorTextColor;
     int newMarginX;
     int newMarginY;
     ImageView marker;
     int gridWidth;
     FrameLayout markerView;
-    DecimalFormat df = new DecimalFormat("#.###");
+    int newMarginZ;
+    ImageView zMarker;
+    int zScaleWidth;
+    FrameLayout zScale;
+    DecimalFormat df = new DecimalFormat("#.#");
     private SensorManager mSensorManager;
     private Sensor mAccelerometer;
     boolean haveSensor = false;
     private float[] mLastAccelerometer = new float[3];
     boolean mLastAccelerometerSet = false;
     FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+    FrameLayout.LayoutParams lp2 = new FrameLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,9 +51,20 @@ public class Accelerometer extends AppCompatActivity implements SensorEventListe
         setContentView(R.layout.activity_accelerometer);
 
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
         value_X = findViewById(R.id.value_X);
         value_Y = findViewById(R.id.value_Y);
         value_Z = findViewById(R.id.value_Z);
+
+        value_X.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                value_X.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                defaultTextColor = value_X.getCurrentTextColor();
+            }
+        });
+        errorTextColor = getResources().getColor(R.color.design_default_color_error);
+
         marker = findViewById(R.id.marker);
         markerView = findViewById(R.id.marker_grid);
         markerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -53,23 +75,53 @@ public class Accelerometer extends AppCompatActivity implements SensorEventListe
             }
         });
 
+        zMarker = findViewById(R.id.zMarker);
+        zScale = findViewById(R.id.zScale);
+        zScale.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                zScale.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                zScaleWidth = zScale.getWidth();
+            }
+        });
+
         start();
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            System.arraycopy(event.values, 0, mLastAccelerometer, 0, event.values.length);
+            mLastAccelerometer = lowPass(event.values.clone(), mLastAccelerometer);
             mLastAccelerometerSet = true;
         }
 
-        value_X.setText(df.format(mLastAccelerometer[0]));
-        value_Y.setText(df.format(mLastAccelerometer[1]));
+        value_X.setText(df.format(-mLastAccelerometer[0]));
+        if(Math.abs(mLastAccelerometer[0])>5){
+            value_X.setTextColor(errorTextColor);
+        } else{
+            value_X.setTextColor(defaultTextColor);
+        }
+        value_Y.setText(df.format(-mLastAccelerometer[1]));
+        if(Math.abs(mLastAccelerometer[1])>5){
+            value_Y.setTextColor(errorTextColor);
+        } else{
+            value_Y.setTextColor(defaultTextColor);
+        }
         value_Z.setText(df.format(mLastAccelerometer[2]));
-        newMarginX = (int) (gridWidth/2 - 40 + mLastAccelerometer[0]*gridWidth/20);
-        newMarginY = (int) (gridWidth/2 - 40 + mLastAccelerometer[1]*gridWidth/20);
+        if(Math.abs(mLastAccelerometer[2])>5){
+            value_Z.setTextColor(errorTextColor);
+        } else{
+            value_Z.setTextColor(defaultTextColor);
+        }
+
+        newMarginX = (int) (gridWidth/2 - 50 + -mLastAccelerometer[0]*gridWidth/20);
+        newMarginY = (int) (gridWidth/2 - 50 + mLastAccelerometer[1]*gridWidth/20);
         lp.setMargins(newMarginX, newMarginY, 0, 0);
         marker.setLayoutParams(lp);
+
+        newMarginZ = (int) (zScaleWidth/2 - 30 + mLastAccelerometer[2]*zScaleWidth/20);
+        lp2.setMargins(newMarginZ, 0, 0, 0);
+        zMarker.setLayoutParams(lp2);
     }
 
     @Override
@@ -115,5 +167,13 @@ public class Accelerometer extends AppCompatActivity implements SensorEventListe
     protected void onResume() {
         super.onResume();
         start();
+    }
+
+    protected float[] lowPass( float[] input, float[] output ) {
+        if ( output == null ) return input;
+        for ( int i=0; i<input.length; i++ ) {
+            output[i] = output[i] + ALPHA * (input[i] - output[i]);
+        }
+        return output;
     }
 }

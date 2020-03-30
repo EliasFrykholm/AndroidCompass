@@ -3,12 +3,14 @@ package com.example.compass;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -17,6 +19,9 @@ public class Compass extends AppCompatActivity implements SensorEventListener {
     TextView txt_compass;
     int mAzimuth;
     private SensorManager mSensorManager;
+    private Vibrator vibrator;
+    private int previousVibration = -1;
+    int azimuthAbs;
     private Sensor mRotationV, mAccelerometer, mMagnetometer;
     boolean haveSensor = false, haveSensor2 = false;
     float[] rMat = new float[9];
@@ -32,8 +37,9 @@ public class Compass extends AppCompatActivity implements SensorEventListener {
         setContentView(R.layout.activity_compass);
 
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        compass_img = (ImageView) findViewById(R.id.img_compass);
-        txt_compass = (TextView) findViewById(R.id.txt_azimuth);
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        compass_img = findViewById(R.id.img_compass);
+        txt_compass = findViewById(R.id.txt_azimuth);
 
         start();
     }
@@ -62,25 +68,62 @@ public class Compass extends AppCompatActivity implements SensorEventListener {
         compass_img.setRotation(-mAzimuth);
 
         String where = "NW";
-
-        if (mAzimuth >= 350 || mAzimuth <= 10)
+        if (mAzimuth >= 345 || mAzimuth <= 15) {
             where = "N";
-        if (mAzimuth < 350 && mAzimuth > 280)
+            if(previousVibration != 0){
+                vibrator.vibrate(new long[]{0, 100, 100}, 0);
+                previousVibration = 0;
+            }
+        }
+        if (mAzimuth < 345 && mAzimuth > 285){
             where = "NW";
-        if (mAzimuth <= 280 && mAzimuth > 260)
+            if(previousVibration != 1){
+                vibrator.vibrate(new long[]{0, 100, 400}, 0);
+                previousVibration = 1;
+            }
+        }
+        if (mAzimuth <= 285 && mAzimuth > 255){
             where = "W";
-        if (mAzimuth <= 260 && mAzimuth > 190)
+            if(previousVibration != 2){
+                vibrator.vibrate(new long[]{0, 100, 800}, 0);
+                previousVibration = 2;
+            }
+        }
+        if (mAzimuth <= 255 && mAzimuth > 195){
             where = "SW";
-        if (mAzimuth <= 190 && mAzimuth > 170)
+            if(previousVibration != -1){
+                vibrator.cancel();
+                previousVibration = -1;
+            }
+        }
+        if (mAzimuth <= 195 && mAzimuth > 165){
             where = "S";
-        if (mAzimuth <= 170 && mAzimuth > 100)
+            if(previousVibration != -1){
+                vibrator.cancel();
+                previousVibration = -1;
+            }
+        }
+        if (mAzimuth <= 165 && mAzimuth > 105){
             where = "SE";
-        if (mAzimuth <= 100 && mAzimuth > 80)
+            if(previousVibration != -1){
+                vibrator.cancel();
+                previousVibration = -1;
+            }
+        }
+        if (mAzimuth <= 105 && mAzimuth > 75){
             where = "E";
-        if (mAzimuth <= 80 && mAzimuth > 10)
+            if(previousVibration != 2){
+                vibrator.vibrate(new long[]{0, 100, 800}, 0);
+                previousVibration = 2;
+            }
+        }
+        if (mAzimuth <= 75 && mAzimuth > 15){
             where = "NE";
-
-
+            if(previousVibration != 1){
+                vibrator.vibrate(new long[]{0, 100, 400}, 0);
+                previousVibration = 1;
+            }
+        }
         txt_compass.setText(mAzimuth + "° " + where);
     }
 
@@ -120,14 +163,8 @@ public class Compass extends AppCompatActivity implements SensorEventListener {
     }
 
     public void stop() {
-        if(haveSensor && haveSensor2){
-            mSensorManager.unregisterListener(this,mAccelerometer);
-            mSensorManager.unregisterListener(this,mMagnetometer);
-        }
-        else{
-            if(haveSensor)
-                mSensorManager.unregisterListener(this,mRotationV);
-        }
+        mSensorManager.unregisterListener(this);
+        vibrator.cancel();
     }
 
     @Override
