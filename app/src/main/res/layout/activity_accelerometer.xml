@@ -107,7 +107,7 @@
             android:id="@+id/marker"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/circle"
+            android:src="@drawable/circle_accent"
             tools:ignore="InvalidId" />
 
         <View
@@ -160,7 +160,7 @@
             android:id="@+id/zMarker"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/line"/>
+            android:src="@drawable/line_accent"/>
     </FrameLayout>
     <TextView
         android:layout_width="wrap_content"

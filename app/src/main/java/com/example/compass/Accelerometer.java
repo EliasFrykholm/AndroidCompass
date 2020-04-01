@@ -7,6 +7,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -37,6 +38,7 @@ public class Accelerometer extends AppCompatActivity implements SensorEventListe
     int zScaleWidth;
     FrameLayout zScale;
     DecimalFormat df = new DecimalFormat("#.#");
+    MediaPlayer mediaPlayer;
     private SensorManager mSensorManager;
     private Sensor mAccelerometer;
     boolean haveSensor = false;
@@ -49,7 +51,7 @@ public class Accelerometer extends AppCompatActivity implements SensorEventListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_accelerometer);
-
+        mediaPlayer = MediaPlayer.create(this, R.raw.pling);
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
         value_X = findViewById(R.id.value_X);
@@ -114,11 +116,25 @@ public class Accelerometer extends AppCompatActivity implements SensorEventListe
             value_Z.setTextColor(defaultTextColor);
         }
 
+        if(Math.hypot(mLastAccelerometer[0], mLastAccelerometer[1]) > 5){
+            marker.setImageResource(R.drawable.circle_primary);
+        } else {
+            if(Math.hypot(mLastAccelerometer[0], mLastAccelerometer[1]) < 0.3 && !mediaPlayer.isPlaying()){
+                mediaPlayer.start();
+            }
+            marker.setImageResource(R.drawable.circle_accent);
+        }
+
         newMarginX = (int) (gridWidth/2 - 50 + -mLastAccelerometer[0]*gridWidth/20);
         newMarginY = (int) (gridWidth/2 - 50 + mLastAccelerometer[1]*gridWidth/20);
         lp.setMargins(newMarginX, newMarginY, 0, 0);
         marker.setLayoutParams(lp);
 
+        if(Math.abs(mLastAccelerometer[2]) > 5){
+            zMarker.setImageResource(R.drawable.line_primary);
+        } else {
+            zMarker.setImageResource(R.drawable.line_accent);
+        }
         newMarginZ = (int) (zScaleWidth/2 - 30 + mLastAccelerometer[2]*zScaleWidth/20);
         lp2.setMargins(newMarginZ, 0, 0, 0);
         zMarker.setLayoutParams(lp2);
@@ -152,9 +168,7 @@ public class Accelerometer extends AppCompatActivity implements SensorEventListe
     }
 
     public void stop() {
-        if(haveSensor){
-            mSensorManager.unregisterListener(this,mAccelerometer);
-        }
+        mSensorManager.unregisterListener(this);
     }
 
     @Override

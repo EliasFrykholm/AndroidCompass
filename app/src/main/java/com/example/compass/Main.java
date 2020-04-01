@@ -6,10 +6,12 @@ import android.view.View;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 public class Main extends AppCompatActivity {
     private Button compassButton;
     private Button accelerometerButton;
+    Toolbar myToolbar = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

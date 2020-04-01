@@ -21,7 +21,6 @@ public class Compass extends AppCompatActivity implements SensorEventListener {
     private SensorManager mSensorManager;
     private Vibrator vibrator;
     private int previousVibration = -1;
-    int azimuthAbs;
     private Sensor mRotationV, mAccelerometer, mMagnetometer;
     boolean haveSensor = false, haveSensor2 = false;
     float[] rMat = new float[9];
@@ -70,34 +69,44 @@ public class Compass extends AppCompatActivity implements SensorEventListener {
         String where = "NW";
         if (mAzimuth >= 345 || mAzimuth <= 15) {
             where = "N";
+            compass_img.setImageResource(R.drawable.ic_compass_n);
             if(previousVibration != 0){
                 vibrator.vibrate(new long[]{0, 100, 100}, 0);
                 previousVibration = 0;
             }
-        }
-        if (mAzimuth < 345 && mAzimuth > 285){
-            where = "NW";
-            if(previousVibration != 1){
-                vibrator.vibrate(new long[]{0, 100, 400}, 0);
-                previousVibration = 1;
-            }
-        }
-        if (mAzimuth <= 285 && mAzimuth > 255){
-            where = "W";
-            if(previousVibration != 2){
-                vibrator.vibrate(new long[]{0, 100, 800}, 0);
-                previousVibration = 2;
-            }
-        }
-        if (mAzimuth <= 255 && mAzimuth > 195){
-            where = "SW";
+        } else if (mAzimuth <= 195 && mAzimuth > 165){
+            where = "S";
+            compass_img.setImageResource(R.drawable.ic_compass_s);
             if(previousVibration != -1){
                 vibrator.cancel();
                 previousVibration = -1;
             }
+        } else if (mAzimuth <= 105 && mAzimuth > 75){
+            where = "E";
+            compass_img.setImageResource(R.drawable.ic_compass_e);
+            if(previousVibration != 2){
+                vibrator.vibrate(new long[]{0, 100, 800}, 0);
+                previousVibration = 2;
+            }
+        } else if (mAzimuth <= 285 && mAzimuth > 255){
+            where = "W";
+            compass_img.setImageResource((R.drawable.ic_compass_w));
+            if(previousVibration != 2){
+                vibrator.vibrate(new long[]{0, 100, 800}, 0);
+                previousVibration = 2;
+            }
+        } else {
+            compass_img.setImageResource(R.drawable.ic_compass);
         }
-        if (mAzimuth <= 195 && mAzimuth > 165){
-            where = "S";
+        if (mAzimuth < 345 && mAzimuth > 285) {
+            where = "NW";
+            if (previousVibration != 1) {
+                vibrator.vibrate(new long[]{0, 100, 400}, 0);
+                previousVibration = 1;
+            }
+        }
+        if (mAzimuth <= 255 && mAzimuth > 195){
+            where = "SW";
             if(previousVibration != -1){
                 vibrator.cancel();
                 previousVibration = -1;
@@ -110,13 +119,7 @@ public class Compass extends AppCompatActivity implements SensorEventListener {
                 previousVibration = -1;
             }
         }
-        if (mAzimuth <= 105 && mAzimuth > 75){
-            where = "E";
-            if(previousVibration != 2){
-                vibrator.vibrate(new long[]{0, 100, 800}, 0);
-                previousVibration = 2;
-            }
-        }
+
         if (mAzimuth <= 75 && mAzimuth > 15){
             where = "NE";
             if(previousVibration != 1){
